@@ -1,5 +1,3 @@
-import { Component } from 'react';
-
 import { GlobalStyle } from './GlobalStyle';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
@@ -9,93 +7,83 @@ import { Layout } from './Layout/Layout.styled';
 import { Modal } from './Modal/Modal';
 import { Message } from './Message/Message';
 import { Loader } from './Loader/Loader';
+import { useEffect, useState } from 'react';
 
-export class App extends Component {
-  state = {
-    query: '',
-    image: [],
-    totalImage: 0,
-    page: 1,
-    selectedImageUrl: '',
-    load: false,
-    error: false,
-  };
+export const App = () => {
+  const [query, setQuery] = useState('');
+  const [image, setImage] = useState([]);
+  const [totalImage, setTotalImage] = useState(0);
+  const [page, setPage] = useState(1);
+  const [selectedImageUrl, setSelectedImageUrl] = useState('');
+  const [load, setLoad] = useState(false);
+  const [error, setError] = useState(false);
 
-  async componentDidUpdate(_, prevState) {
-    if (
-      prevState.query !== this.state.query ||
-      prevState.page !== this.state.page
-    ) {
+  useEffect(() => {
+    async function getImg() {
       try {
-        this.setState({ load: true, error: false });
-        const responce = await getImages(this.state.query, this.state.page);
-        this.setState({
-          image: [...this.state.image, ...responce.data.hits],
-          totalImage: responce.data.totalHits,
-        });
+        setLoad(true);
+        setError(false);
+
+        const responce = await getImages(query, page);
+        setImage(prev => [...prev, ...responce.data.hits]);
+        setTotalImage(responce.data.totalHits);
       } catch {
-        this.setState({ error: true });
+        setError(true);
       } finally {
-        this.setState({ load: false });
+        setLoad(false);
       }
     }
-  }
+    if (query !== '') {
+      getImg();
+    }
+  }, [query, page]);
 
-  getQuery = e => {
+  const getQuery = e => {
     e.preventDefault();
-    this.setState({
-      query: `${Date.now()}/${e.target.elements.query.value}`,
-      page: 1,
-      image: [],
-      totalImage: 0,
-    });
+    setQuery(`${Date.now()}/${e.target.elements.query.value}`);
+    setPage(1);
+    setImage([]);
+    setTotalImage(0);
   };
 
-  onBtnClick = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const onBtnClick = () => {
+    setPage(prev => prev + 1);
   };
 
-  getImageForModal = url => {
-    this.setState({ selectedImageUrl: url });
+  const getImageForModal = url => {
+    setSelectedImageUrl(url);
   };
 
-  onModalClose = () => {
-    this.setState({ selectedImageUrl: '' });
+  const onModalClose = () => {
+    setSelectedImageUrl('');
   };
 
-  render() {
-    return (
-      <Layout>
-        <Searchbar onSubmit={this.getQuery}></Searchbar>
-        {this.state.image.length !== 0 && (
-          <ImageGallery
-            image={this.state.image}
-            onImageClick={this.getImageForModal}
-          ></ImageGallery>
-        )}
+  return (
+    <Layout>
+      <Searchbar onSubmit={getQuery}></Searchbar>
+      {image.length !== 0 && (
+        <ImageGallery
+          image={image}
+          onImageClick={getImageForModal}
+        ></ImageGallery>
+      )}
 
-        {this.state.load && <Loader></Loader>}
+      {load && <Loader></Loader>}
 
-        {this.state.image.length !== 0 &&
-          this.state.totalImage > PER_PAGE * this.state.page && (
-            <Button onClick={this.onBtnClick}></Button>
-          )}
+      {image.length !== 0 && totalImage > PER_PAGE * page && (
+        <Button onClick={onBtnClick}></Button>
+      )}
 
-        <Message
-          error={this.state.error}
-          empty={
-            this.state.image.length === 0 &&
-            this.state.query !== '' &&
-            !this.state.load
-          }
-        ></Message>
-        <Modal
-          url={this.state.selectedImageUrl}
-          query={this.state.query}
-          onModalClose={this.onModalClose}
-        ></Modal>
-        <GlobalStyle></GlobalStyle>
-      </Layout>
-    );
-  }
-}
+      <Message
+        error={error}
+        empty={image.length === 0 && query !== '' && !load}
+      ></Message>
+      <Modal
+        url={selectedImageUrl}
+        query={query}
+        onModalClose={onModalClose}
+      ></Modal>
+      <GlobalStyle></GlobalStyle>
+    </Layout>
+  );
+};
