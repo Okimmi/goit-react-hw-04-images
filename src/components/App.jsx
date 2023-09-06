@@ -1,7 +1,7 @@
 import { GlobalStyle } from './GlobalStyle';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
-import { PER_PAGE, getImages } from 'service/api-image';
+import { PER_PAGE, getImages } from 'services/api-image';
 import { Button } from './Button/Button';
 import { Layout } from './Layout/Layout.styled';
 import { Modal } from './Modal/Modal';
