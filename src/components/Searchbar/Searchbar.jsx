@@ -1,10 +1,15 @@
 import { TbPhotoSearch } from 'react-icons/tb';
 import { Bar, Btn, Form, Input } from './Searchbar.styled';
 
-export const Searchbar = ({ onSubmit }) => {
+export const Searchbar = ({ getQuery }) => {
+  const onSubmit = e => {
+    e.preventDefault();
+    getQuery(e.target.elements.query.value);
+  };
+
   return (
     <Bar>
-      <Form onSubmit={e => onSubmit(e)}>
+      <Form onSubmit={onSubmit}>
         <Input
           type="text"
           name="query"

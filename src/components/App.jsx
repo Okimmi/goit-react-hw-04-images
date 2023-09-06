@@ -1,7 +1,7 @@
 import { GlobalStyle } from './GlobalStyle';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
-import { PER_PAGE, getImages } from 'Services/api-image';
+import { PER_PAGE, getImages } from 'service/api-image';
 import { Button } from './Button/Button';
 import { Layout } from './Layout/Layout.styled';
 import { Modal } from './Modal/Modal';
@@ -38,9 +38,8 @@ export const App = () => {
     }
   }, [query, page]);
 
-  const getQuery = e => {
-    e.preventDefault();
-    setQuery(`${Date.now()}/${e.target.elements.query.value}`);
+  const getQuery = query => {
+    setQuery(`${Date.now()}/${query}`);
     setPage(1);
     setImage([]);
     setTotalImage(0);
@@ -60,7 +59,7 @@ export const App = () => {
 
   return (
     <Layout>
-      <Searchbar onSubmit={getQuery}></Searchbar>
+      <Searchbar getQuery={getQuery}></Searchbar>
       {image.length !== 0 && (
         <ImageGallery
           image={image}
